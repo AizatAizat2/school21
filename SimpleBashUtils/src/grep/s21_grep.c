@@ -147,10 +147,6 @@ void base_func(char **filename, int count, FILE *file, regex_t re,
         matching_count++;
       }
 
-      if (options->f == 1) {
-        printf("%d", options->f);
-      }
-
       if (options->h == 1) {
         printf("%s\n", line);
       }
