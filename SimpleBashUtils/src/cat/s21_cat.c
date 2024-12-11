@@ -57,6 +57,9 @@ void parser(int argc, char *argv[], opt *options) {
 }
 
 void numstr_n(int *strCount, int *flag_bn, int ch) {
+  
+  
+
   if (*flag_bn == 1) {
     printf("%6d\t", ++(*strCount));
     *flag_bn = 0;
@@ -64,6 +67,7 @@ void numstr_n(int *strCount, int *flag_bn, int ch) {
   if(ch == '\n') {
     *flag_bn = 1;
   }
+
 }
 
 void numstr_b(int *strCount, int *flag_bn, int ch) {
@@ -77,30 +81,26 @@ void numstr_b(int *strCount, int *flag_bn, int ch) {
   if (ch == '\n') {
     *flag_bn = 1;
   }
+
 }
 
-void numstr_s(int *flag_error, int *prev_newline, int *strCount, int *ch) {
+void numstr_s(int *prev_newline, int *ch, int *skip_line) {
   if (*ch == '\n') {
-    (*strCount)++;
-
-    if (*prev_newline == 0) {
+    // Если текущая строка пустая и предыдущая была пустой, пропускаем ее.
+    if (*prev_newline == 1) {
+      *skip_line = 1;
+    } else {
+      // Печатаем одну пустую строку
       putchar(*ch);
-      *prev_newline = 1;
-      *strCount = 0;
+      *skip_line = 0;  // Сбрасываем флаг пропуска
     }
-
+    *prev_newline = 1;  // Обновляем флаг о новой строке
   } else {
-    if (*strCount >= 1) {
-      putchar('\n');
-      *strCount = 0;
+    // Печатаем текущий символ, если строка не была пропущена
+    if (*skip_line == 0) {
+      putchar(*ch);
     }
-
-    putchar(*ch);
-    *prev_newline = 0;
-  }
-
-  if (*ch == EOF) {
-    *flag_error = 1;
+    *prev_newline = 0;  // Устанавливаем флаг, что текущий символ не новая строка
   }
 }
 
@@ -123,18 +123,15 @@ void numstr_v(int *ch) {
   if (*ch > 127) {
     putchar('M');
     putchar('-');
-    //printf("%d", *ch);
-    //putchar('^');
     *ch -= 128;
   }
 }
 
-void outline(char **file, opt options, int optind, int *strCount) {
-  int flag_bn = 1;
+void outline(char **file, opt options, int optind, int *strCount, int *flag_bn) {
   int prev_newline = 1;
   int flag_error = 0;
-  
   int ch = 0;
+  int skip_line = 0;
 
   FILE *name = fopen(file[optind], "r");
   if (name == NULL) {
@@ -142,24 +139,27 @@ void outline(char **file, opt options, int optind, int *strCount) {
   } else {
     while ((ch = getc(name)) != EOF) {
 
-      if (options.e == 1 && ch == '\n') putchar('$');  // вывод $
+      if (options.e == 1 && ch == '\n') 
+      putchar('$');  // вывод $
       if (options.n == 1 && !options.b)
-        numstr_n(strCount, &flag_bn, ch);  // вывод номера всех строк
+        numstr_n(strCount, flag_bn, ch);  // вывод номера всех строк
       if (options.b == 1 && !options.n)
-        numstr_b(strCount, &flag_bn, ch);  // вывод номера непустых строк
+        numstr_b(strCount, flag_bn, ch);  // вывод номера непустых строк
       if (options.s == 1 && flag_error != 1)
-        numstr_s(&flag_error, &prev_newline, strCount,
-                 &ch);  // удаление пустых строк
+        numstr_s(&prev_newline, &ch, &skip_line);  // удаление пустых строк
       if (options.t == 1) numstr_t(&ch);
       if (options.v == 1) numstr_v(&ch);
 
       if (ch != EOF && options.s != 1) {
         putchar(ch);
       }
-    }
 
-    fclose(name);
+
+
+    
   }
+  fclose(name);
+}
 }
 
 int main(int argc, char *argv[]) {
@@ -167,9 +167,9 @@ int main(int argc, char *argv[]) {
   parser(argc, argv, &options);
 
   int strCount = 0;
-  
+  int flag_bn = 1;
   for (int i = optind; i < argc; i++) {
-    outline(argv, options, i, &strCount);
+    outline(argv, options, i, &strCount, &flag_bn);
   }
 
   return 0;
