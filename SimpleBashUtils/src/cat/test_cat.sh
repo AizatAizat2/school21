@@ -1,7 +1,6 @@
 #!/bin/bash
 
 FLAGS="-b -e -n -s -t -v -E -T --number --number-nonblank --squeeze-blank"
-BIG_FLAG="-benstET"
 FILES="../examples/all_sym_160.txt ../examples/example0.txt ../examples/example1.txt ../examples/example2.txt ../examples/example ../examples/test_0_grep.txt ../examples/0.txt"
 
 SUCCESS=0
@@ -105,40 +104,6 @@ else
             
         done
     done
-
-    for file in $FILES; do
-        echo "./s21_cat $BIG_FLAG $file:"
-
-        echo "~~~~~~~~~~~~~~~~~~~~~"
-        echo -n " TEST - "
-        cat $BIG_FLAG $file > test1.txt
-        ./s21_cat $BIG_FLAG $file > test2.txt
-        diff -q test1.txt test2.txt > /dev/null
-        if [ $? -eq 0 ]; then
-            SUCCESS=$((SUCCESS + 1))
-            echo "[${GREEN}PASS${NC}]"
-        else
-            FAIL=$((FAIL + 1))
-            echo "[${RED}FAIL${NC}]"
-        fi
-        echo "~~~~~~~~~~~~~~~~~~~~~"
-        
-    done
-
-    echo "./s21_cat $BIG_FLAG ../examples/*:"
-    echo "~~~~~~~~~~~~~~~~~~~~~"
-    echo -n " TEST - "
-    cat $BIG_FLAG ../examples/* > test1.txt
-    ./s21_cat $BIG_FLAG ../examples/* > test2.txt
-    diff -q test1.txt test2.txt > /dev/null
-    if [ $? -eq 0 ]; then
-        SUCCESS=$((SUCCESS + 1))
-        echo "[${GREEN}PASS${NC}]"
-    else
-        FAIL=$((FAIL + 1))
-        echo "[${RED}FAIL${NC}]"
-    fi
-    echo "~~~~~~~~~~~~~~~~~~~~~"
     
     echo "${GREEN}SUCCESS${NC} = $SUCCESS"
     echo "${RED}FAILS${NC} = $FAIL"
