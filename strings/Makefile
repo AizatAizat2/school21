@@ -1,28 +1,28 @@
 CC = gcc
-FLAGS = -Wall -Werror -Wextra -std=c11
-LFGLAGS = -lcheck -lm -lpthread -l s21_string.a
-SOURCE = $(wildcard s21_*.c)
-OBJECTS = $(patsubst %.c, %.o, $(SOURCE))
+СFLAGS = -Wall -Werror -Wextra -std=c11
 
-all:
-	clean
-	test.o
-	s21_string.a
-	test
+TARGET = s21_test
 
-test: test.o s21_string.a
-	$(CC) $(FLAGS) $(LFLAGS) -o test test.o
-	chmod +x test
-	./test
+SRC_DIR = .
 
-test.o: test.c s21_string.h
-	$(CC) $(FLAGS) -c test.c -o test.o
+INCLUDES = -I$(SRC_DIR)
 
-s21_string.a: $(OBJECTS)
-	ar rcs s21_string.a $(OBJECTS)
+MAIN_SRC = $(SRC_DIR)/s21_test.c
 
-$(OBJECTS):
-	$(CC) $(FLAGS) -c s21_string.h $(SOURCE)
+SRC = $(wildcard $(SRC_DIR)/s21_*.c)
+
+OBJ = $(SRC:.c=.o)
+MAIN_OBJ = $(MAIN_SRC:.c=.o)
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ) $(MAIN_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ $(INCLUDES) -lcheck -lrt -lm -lpthread -lsubunit
+
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.c $(SRC_DIR)/s21_string.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -rf s21_string.a s21_string_test *.o *.gcda *.gcno *.gcov *.gch
+	rm -f $(OBJ) $(MAIN_OBJ) $(TARGET)
+
+rebuild: clean all
